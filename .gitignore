@@ -3,3 +3,5 @@ venv
 bkup_*
 *.zip
 compile
+build
+dist

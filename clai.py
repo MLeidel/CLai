@@ -50,8 +50,9 @@ openmsg = '''
   \_____| |______|  \__,_| |_|
 
 Welcome to CLai `clay`
-ENV 'GPTKEY' must contain OpenAI Auth Code
-ENV 'GPTMOD' must contain default model to use
+ENV 'GPTKEY' OpenAI Auth Code
+ENV 'GPTMOD' default model to use
+ENV 'GPTMSG' default system message
 
 Usage:
 clai write-prompt-here...and hit ENTER
