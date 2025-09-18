@@ -5,3 +5,4 @@ bkup_*
 compile
 build
 dist
+copy

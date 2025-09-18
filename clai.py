@@ -3,7 +3,7 @@ clai.py
 Command Line AI
 (CLai == `clay`)
 
-usage: clai [prompt | log | html | clear | purge | model {model} | system {system message...}]
+usage: clai [prompt | log | new | clear | purge | model {model} | system {system message...}]
 
 Besides the prompt itself, other commands are:
 
@@ -61,7 +61,7 @@ clai prompt...  launch your query to AI
 clai log        print out log contents to the console
 clai new        new conversation for current directory
 clai clea[r|n]  erase .clai_local directory and all it's files
-clai purge      erase log file
+clai purge|del  erase log file
 clai model {model} set model for current directory
 clai system {"system prompt text"}  set system prompt
 '''
@@ -82,7 +82,7 @@ clai PROMPT...  write the prompt on command line
 clai log        print out log contents to the console
 clai new        new conversation for current directory
 clai clea[r|n]  erase .clai_local directory and all it's files
-clai purge      erase log file
+clai purge|del  erase log file
 clai model {model} set model for current directory
 clai system {"system prompt text"}  set system prompt
 
@@ -122,7 +122,6 @@ def load_buffer():
 def save_buffer(buf):
     with open(conversation_path, "w", encoding="utf-8") as f:
         json.dump(buf, f, ensure_ascii=False, indent=2)
-
 
 def extract_token_counts(resp):
     """
@@ -222,7 +221,7 @@ elif sys.argv[1].lower() == "log":
     if os.path.isfile(log_path):
         cprint(open(log_path, encoding='utf-8').read(), 'yellow')
     sys.exit()
-elif sys.argv[1].lower() == "purge":
+elif sys.argv[1].lower() == "purge" or sys.argv[1].lower() == "del":
     if os.path.isfile(log_path):
         os.remove(log_path)
     cprint("log purged\n", 'yellow', attrs=['bold',])
