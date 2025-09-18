@@ -8,9 +8,7 @@ This is an uncomplicated console AI conversation utility for Linux and Windows.
 
 (CLai == _clay_)  
 
-Install `clai` and `clai_files` in your system path
-
-    usage: clai
+    usage: python3 clai.py
     [PROMPT | log | clear | purge | model {model} | system {system message...}]
 
 | command line | purpose             |
@@ -20,7 +18,7 @@ Install `clai` and `clai_files` in your system path
 |`clai new      `                    |new conversation for current directory  
 |`clai clea[r\|n]`                   |erase `.clai_local` directory and all it's files  
 |`clai purge    `                    |erase log file  
-|`clai set {model}`                  |set model for current directory  
+|`clai model {model}`                |set model for current directory  
 |`clai system {"system prompt text"}`|set system prompt  
 
 On running clai in a directory not previously visited,  
@@ -40,6 +38,6 @@ clai requires these environment keys:
 'GPTMOD' for default openai model,  
 'GPTMSG' for default system message  
 
+In your `.bashrc` file  
 for example: `export GPTMOD=gpt-4o-mini`
-
 

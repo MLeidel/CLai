@@ -49,18 +49,20 @@ openmsg = '''
  | |____  | |____  | (_| | | |
   \_____| |______|  \__,_| |_|
 
-Welcome to CLai `clay`
-ENV 'GPTKEY' OpenAI Auth Code
-ENV 'GPTMOD' default model to use
-ENV 'GPTMSG' default system message
+    Welcome to CLai `clay`
+
+required environment variables:
+'GPTKEY' OpenAI Auth Code
+'GPTMOD' default model to use
+'GPTMSG' default system message
 
 Usage:
-clai write-prompt-here...and hit ENTER
-clai log        print out the log contents to the console
+clai prompt...  launch your query to AI
+clai log        print out log contents to the console
 clai new        new conversation for current directory
 clai clea[r|n]  erase .clai_local directory and all it's files
 clai purge      erase log file
-clai set {model}                    set model for current directory
+clai model {model} set model for current directory
 clai system {"system prompt text"}  set system prompt
 '''
 
@@ -71,17 +73,17 @@ Command Line AI
 Install clai and clai_files in your system path
 
 usage: clai
-  [PROMPT | log | html |
+  [PROMPT... | log | html |
    clear | purge |
    model {model} |
    system {system message...}]
 
-clai PROMPT...  write the prompt on the command line
-clai log        print out the log contents to the console
+clai PROMPT...  write the prompt on command line
+clai log        print out log contents to the console
 clai new        new conversation for current directory
 clai clea[r|n]  erase .clai_local directory and all it's files
 clai purge      erase log file
-clai set {model}                    set model for current directory
+clai model {model} set model for current directory
 clai system {"system prompt text"}  set system prompt
 
 On running clai in a directory not previously visited,
