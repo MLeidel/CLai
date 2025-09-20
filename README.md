@@ -18,7 +18,7 @@ Install `clai` and `clai_files` in your system path
 |`clai PROMPT...`                    |write the prompt on the command line  
 |`clai log      `                    |print out the log contents to the console  
 |`clai new      `                    |new conversation for current directory  
-|`clai clea[r|n]`                    |erase .clai_local directory and all it's files  
+|`clai clea[r\|n]`                   |erase .clai_local directory and all it's files  
 |`clai purge    `                    |erase log file  
 |`clai set {model}`                  |set model for current directory  
 |`clai system {"system prompt text"}`|set system prompt  
