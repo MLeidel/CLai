@@ -3,7 +3,7 @@ clai.py
 Command Line AI
 (CLai == `clay`)
 
-usage: clai [prompt | log | new | clear | purge | model {model} | system {system message...}]
+usage: clai [prompt | log | html | clear | purge | model {model} | system {system message...}]
 
 Besides the prompt itself, other commands are:
 
@@ -33,6 +33,8 @@ import sys, os
 from pathlib import Path
 import datetime
 import json
+import shutil
+import textwrap
 from time import localtime, strftime
 from termcolor import cprint
 from openai import OpenAI
@@ -47,22 +49,22 @@ openmsg = '''
  | |      | |        __ _   _
  | |      | |       / _` | | |
  | |____  | |____  | (_| | | |
-  \_____| |______|  \__,_| |_|
+  \\_____| |______|  \\__,_| |_|
 
-    Welcome to CLai `clay`
+Welcome to CLai `clay`
 
-required environment variables:
-'GPTKEY' OpenAI Auth Code
-'GPTMOD' default model to use
-'GPTMSG' default system message
+Requires environment settings:
+ENV 'GPTKEY' OpenAI Auth Code
+ENV 'GPTMOD' default model to use
+ENV 'GPTMSG' default system message
 
 Usage:
-clai prompt...  launch your query to AI
-clai log        print out log contents to the console
+clai write-prompt-here...and hit ENTER
+clai log        print out the log contents to the console
 clai new        new conversation for current directory
 clai clea[r|n]  erase .clai_local directory and all it's files
-clai purge|del  erase log file
-clai model {model} set model for current directory
+clai purge      erase log file
+clai set {model}                    set model for current directory
 clai system {"system prompt text"}  set system prompt
 '''
 
@@ -73,17 +75,17 @@ Command Line AI
 Install clai and clai_files in your system path
 
 usage: clai
-  [PROMPT... | log | html |
+  [PROMPT | log | html |
    clear | purge |
    model {model} |
    system {system message...}]
 
-clai PROMPT...  write the prompt on command line
-clai log        print out log contents to the console
+clai PROMPT...  write the prompt on the command line
+clai log        print out the log contents to the console
 clai new        new conversation for current directory
 clai clea[r|n]  erase .clai_local directory and all it's files
-clai purge|del  erase log file
-clai model {model} set model for current directory
+clai purge      erase log file
+clai set {model}                    set model for current directory
 clai system {"system prompt text"}  set system prompt
 
 On running clai in a directory not previously visited,
@@ -123,6 +125,7 @@ def save_buffer(buf):
     with open(conversation_path, "w", encoding="utf-8") as f:
         json.dump(buf, f, ensure_ascii=False, indent=2)
 
+
 def extract_token_counts(resp):
     """
     Return (total_tokens, prompt_tokens, completion_tokens)
@@ -159,6 +162,29 @@ def gptCode(key: str, model: str, messages: str) -> str:
     except Exception as e:
         error_abort("Client Error " + str(e))
         return ""
+
+def cprint_text_wrapped(source, text, color='yellow'):
+    # determine a sensible width from the terminal (fallback to 80)
+    width = shutil.get_terminal_size((80, 20)).columns
+
+    # determine source of text to be output
+    if source.lower() == "file":
+        with open(text, encoding='utf-8') as f:
+            data = f.read()
+    else:
+        data = text
+
+    # wrap each original line, preserving line breaks
+    wrapped_lines = []
+    for line in data.splitlines():
+        wrapped = textwrap.wrap(line, width=width)
+        if not wrapped:
+            wrapped_lines.append('')  # preserve empty lines
+        else:
+            wrapped_lines.extend(wrapped)
+
+    wrapped_text = "\n".join(wrapped_lines)
+    cprint(wrapped_text, color)
 
 # BEGIN PROCESS REQUEST
 
@@ -219,9 +245,9 @@ elif sys.argv[1].lower() == "new":
     sys.exit()
 elif sys.argv[1].lower() == "log":
     if os.path.isfile(log_path):
-        cprint(open(log_path, encoding='utf-8').read(), 'yellow')
+        cprint_text_wrapped("file", log_path, 'yellow')
     sys.exit()
-elif sys.argv[1].lower() == "purge" or sys.argv[1].lower() == "del":
+elif sys.argv[1].lower() == "purge":
     if os.path.isfile(log_path):
         os.remove(log_path)
     cprint("log purged\n", 'yellow', attrs=['bold',])
@@ -284,7 +310,7 @@ CBUFF.append(
 )
 
 # 4) show it
-cprint("\n" + ai_text + "\n", "green")
+cprint_text_wrapped("text", "\n" + ai_text + "\n", "green")
 
 # SAVE conversation to disk
 save_buffer(CBUFF)
