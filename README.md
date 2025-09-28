@@ -24,7 +24,7 @@ clai will prompt for model and assume new conversation.
 |`clai new [role]`                   |new conversation & optional new role  
 |`clai clea[r\|n]`                   |erase .clai_local directory and all it's files  
 |`clai purge    `                    |erase log file  
-|`clai set {model}`                  |set model for current directory  
+|`clai model {model}`                |set model for current directory  
 
 On running clai in a directory not previously visited,  
 clai will prompt for model and assume new conversation.
