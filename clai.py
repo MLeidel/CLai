@@ -3,23 +3,22 @@ clai.py
 Command Line AI
 (CLai == `clay`)
 
-usage: clai [prompt | log | html | clear | purge | model {model} | system {system message...}]
+usage: clai [prompt | log | new [role] | clear | purge | model {model} ]
 
 Besides the prompt itself, other commands are:
 
-  log       print out the log contents to the console
-  new       new conversation for current directory
-  clea[r|n] erase clai_conversation, clai_model, clai_log, clai_sysmsg
+  log        print out the log contents to the console
+  new [role] new conversation and optional new role
+  clea[r|n]  erase clai_conversation, clai_model, clai_log, clai_sysmsg
   purge     erase log clai_log
   model     set model for current directory
-  system    set system message for current directory
   help      print clai help to console
-
-On running clai in a directory not previously visited,
-clai will prompt for model and assume new conversation
 
 Files created:
     .clai_local/ clai_conversation, clai_model, clai_log, clai_sysmsg
+
+On running clai in a directory it has not NOT PREVIOUSLY VISITED,
+clai will use its default settings (GptKEY, model, role)
 
 Requires ENV keys:
 'GPTKEY' for your openai key,
@@ -61,32 +60,31 @@ ENV 'GPTMSG' default system message
 Usage:
 clai write-prompt-here...and hit ENTER
 clai log        print out the log contents to the console
-clai new        new conversation for current directory
+clai new [role] new conversation [optional new role]
 clai clea[r|n]  erase .clai_local directory and all it's files
 clai purge      erase log file
-clai set {model}                    set model for current directory
-clai system {"system prompt text"}  set system prompt
+clai model {model}  set model for current directory
+
+clai establishes a '.clai_local' in each directory it visits.
 '''
 
 helpmsg = '''
 ----------- c l a i  H E L P -----------
 Command Line AI
 (CLai == `clay`)
-Install clai and clai_files in your system path
 
-usage: clai
-  [PROMPT | log | html |
+usage: python3 clai.py
+  [PROMPT | log |
    clear | purge |
    model {model} |
-   system {system message...}]
+   new [role] ]
 
 clai PROMPT...  write the prompt on the command line
 clai log        print out the log contents to the console
-clai new        new conversation for current directory
-clai clea[r|n]  erase .clai_local directory and all it's files
-clai purge      erase log file
-clai set {model}                    set model for current directory
-clai system {"system prompt text"}  set system prompt
+clai new [role] new conversation for current directory
+clai clea[r|n]  removes .clai_local directory
+clai purge          erase log file
+clai model {model}  set model for current directory
 
 On running clai in a directory not previously visited,
 clai will prompt for model and assume new conversation.
@@ -238,20 +236,18 @@ if sys.argv[1].lower() == "model":
     open(model_path, 'w', encoding='utf-8').write(MODEL)
     cprint(f"Model: {MODEL}\n", 'yellow', attrs=['bold',])
     sys.exit()
-elif sys.argv[1].lower() == "new":
-    if os.path.isfile(conversation_path):
-        os.remove(conversation_path)
-    cprint("New conversation\n", 'yellow', attrs=['bold',])
-    sys.exit()
+
 elif sys.argv[1].lower() == "log":
     if os.path.isfile(log_path):
         cprint_text_wrapped("file", log_path, 'yellow')
     sys.exit()
+
 elif sys.argv[1].lower() == "purge":
     if os.path.isfile(log_path):
         os.remove(log_path)
     cprint("log purged\n", 'yellow', attrs=['bold',])
     sys.exit()
+
 elif sys.argv[1].lower().startswith("clea"):
     if os.path.isfile(conversation_path):
         os.remove(conversation_path)
@@ -265,14 +261,17 @@ elif sys.argv[1].lower().startswith("clea"):
     Path(files_path).rmdir()
     cprint("clai files removed\n", 'yellow', attrs=['bold',])
     sys.exit()
-elif sys.argv[1].lower() == "system":
-    if len(sys.argv) != 3:
-        cprint("missing 'text..' system 'text..'\n", 'red', attrs=['bold',])
-        sys.exit()
-    SYSMSG = sys.argv[2].strip()
-    open(sysmsg_path, 'w', encoding='utf-8').write(SYSMSG)
-    cprint(f"System Message: {SYSMSG}\n", 'yellow', attrs=['bold',])
+
+elif sys.argv[1].lower() == "new":
+    if os.path.isfile(conversation_path):
+        os.remove(conversation_path)
+    cprint("New conversation\n", 'yellow', attrs=['bold',])
+    if len(sys.argv) == 3:
+        SYSMSG = sys.argv[2].strip()
+        open(sysmsg_path, 'w', encoding='utf-8').write(SYSMSG)
+        cprint(f"System Message: {SYSMSG}\n", 'yellow', attrs=['bold',])
     sys.exit()
+
 elif sys.argv[1].lower() == "help":
     cprint(helpmsg, 'grey', attrs=['bold',])  # , attrs=['reverse']
     cprint(f"Current Model: {MODEL}", 'grey', attrs=['bold',])
@@ -291,7 +290,7 @@ if os.path.isfile(conversation_path) is True:
     CBUFF = load_buffer()
 else:
     CBUFF = [
-        {"role": "system", "content": "You are a helpful assistant."}
+        {"role": "system", "content": SYSMSG}
     ]
 
 CBUFF.append(

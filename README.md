@@ -6,22 +6,25 @@ ___Console program to converse with Gpt OpenAI Completion engine___
 
 This is an uncomplicated console AI conversation utility for Linux and Windows.
 
-(CLai == _clay_)  
+### Command Line AI
 
-Install `clai` and `clai_files` in your system path
+(CLai == `clay`)
 
-    usage: clai
-    [PROMPT | log | clear | purge | model {model} | system {system message...}]
+    USAGE: python3 clai.py
+      [PROMPT | log | clear | purge |  
+       model {model} | new [role] ]
+   
+On running clai in a directory not previously visited,  
+clai will prompt for model and assume new conversation.
 
 | command line | purpose             |
 | :--- | :---                        |
 |`clai PROMPT...`                    |write the prompt on the command line  
 |`clai log      `                    |print out the log contents to the console  
-|`clai new      `                    |new conversation for current directory  
+|`clai new [role]`                   |new conversation & optional new role  
 |`clai clea[r\|n]`                   |erase .clai_local directory and all it's files  
 |`clai purge    `                    |erase log file  
 |`clai set {model}`                  |set model for current directory  
-|`clai system {"system prompt text"}`|set system prompt  
 
 On running clai in a directory not previously visited,  
 clai will prompt for model and assume new conversation.
@@ -42,4 +45,5 @@ clai requires these environment keys:
 
 for example: `export GPTMOD=gpt-4o-mini`
 
+`pyinstaller --onedir --clean --noconfirm --strip --contents-directory clai_files clai.py`
 
