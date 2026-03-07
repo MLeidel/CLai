@@ -298,6 +298,7 @@ CBUFF.append(
 )
 
 # 2) call the chat completion
+print("\nThinking . . .", end="\r")
 ai_text, total, prompt, completion = gptCode("GPTKEY", MODEL, CBUFF)
 
 if ai_text == "":
@@ -309,7 +310,7 @@ CBUFF.append(
 )
 
 # 4) show it
-cprint_text_wrapped("text", "\n" + ai_text + "\n", "green")
+cprint_text_wrapped("text", ai_text + "\n", "green")
 
 # SAVE conversation to disk
 save_buffer(CBUFF)
