@@ -50,22 +50,14 @@ openmsg = '''
  | |____  | |____  | (_| | | |
   \\_____| |______|  \\__,_| |_|
 
-Welcome to CLai `clay`
-
-Requires environment settings:
-ENV 'GPTKEY' OpenAI Auth Code
-ENV 'GPTMOD' default model to use
-ENV 'GPTMSG' default system message
-
 Usage:
-clai write-prompt-here...and hit ENTER
+clai write-prompt-here...
 clai log        print out the log contents to the console
-clai new [role] new conversation [optional new role]
+clai new [role] new conversation [optional new sys msg]
 clai clea[r|n]  erase .clai_local directory and all it's files
 clai purge      erase log file
 clai model {model}  set model for current directory
-
-clai establishes a '.clai_local' in each directory it visits.
+clai help       more info
 '''
 
 helpmsg = '''
