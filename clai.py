@@ -79,7 +79,8 @@ clai purge          erase log file
 clai model {model}  set model for current directory
 
 On running clai in a directory not previously visited,
-clai will prompt for model and assume new conversation.
+clai will assume new conversation and
+create a .clai_local directory.
 
 Files created:
     .clai_local/
@@ -290,7 +291,7 @@ CBUFF.append(
 )
 
 # 2) call the chat completion
-print("\nThinking . . .", end="\r")
+print("\n Thinking . . .", end="\r")
 ai_text, total, prompt, completion = gptCode("GPTKEY", MODEL, CBUFF)
 
 if ai_text == "":
@@ -317,3 +318,4 @@ with open(log_path, "a", encoding="utf-8") as fout:
         role = msg["role"]
         fout.write(f"{role.upper()}:\n{msg['content']}\n\n")
     fout.write("="*40 + "\n\n")
+
