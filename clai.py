@@ -34,6 +34,8 @@ import datetime
 import json
 import shutil
 import textwrap
+from rich.status import Status
+import time
 from time import localtime, strftime
 from termcolor import cprint
 from openai import OpenAI
@@ -50,10 +52,17 @@ openmsg = '''
  | |____  | |____  | (_| | | |
   \\_____| |______|  \\__,_| |_|
 
+Welcome to CLai `clay`
+
+Requires environment settings:
+ENV 'GPTKEY' OpenAI Auth Code
+ENV 'GPTMOD' default model to use
+ENV 'GPTMSG' default system message
+
 Usage:
-clai write-prompt-here...
+clai write-prompt-here...and hit ENTER
 clai log        print out the log contents to the console
-clai new [role] new conversation [optional new sys msg]
+clai new [role] new conversation [optional new role]
 clai clea[r|n]  erase .clai_local directory and all it's files
 clai purge      erase log file
 clai model {model}  set model for current directory
@@ -65,11 +74,7 @@ helpmsg = '''
 Command Line AI
 (CLai == `clay`)
 
-usage: python3 clai.py
-  [PROMPT | log |
-   clear | purge |
-   model {model} |
-   new [role] ]
+usage:
 
 clai PROMPT...  write the prompt on the command line
 clai log        print out the log contents to the console
@@ -77,10 +82,12 @@ clai new [role] new conversation for current directory
 clai clea[r|n]  removes .clai_local directory
 clai purge          erase log file
 clai model {model}  set model for current directory
+clai help       this screen
 
-On running clai in a directory not previously visited,
-clai will assume new conversation and
-create a .clai_local directory.
+When running clai in a directory not previously visited,
+clai will assume new conversation.
+
+clai establishes a '.clai_local' in each directory it visits.
 
 Files created:
     .clai_local/
@@ -93,7 +100,6 @@ clai requires these environment keys:
 'GPTKEY' for your openai key,
 'GPTMOD' for default openai model,
 'GPTMSG' for default system message
-for example: export GPTMOD=gpt-4o-mini
 '''
 
 # FUNCTIONS
@@ -291,11 +297,10 @@ CBUFF.append(
 )
 
 # 2) call the chat completion
-print("\n Thinking . . .", end="\r")
-ai_text, total, prompt, completion = gptCode("GPTKEY", MODEL, CBUFF)
-
-if ai_text == "":
-    sys.exit()
+with Status("[bold green]Calling AI...[/bold green]"):
+    ai_text, total, prompt, completion = gptCode("GPTKEY", MODEL, CBUFF)
+    if ai_text == "":
+        sys.exit()
 
 # 3) add the assistant reply to history
 CBUFF.append(
@@ -303,7 +308,7 @@ CBUFF.append(
 )
 
 # 4) show it
-cprint_text_wrapped("text", ai_text + "\n", "green")
+cprint_text_wrapped("text", "\n" + ai_text + "\n", "green")
 
 # SAVE conversation to disk
 save_buffer(CBUFF)
@@ -318,4 +323,3 @@ with open(log_path, "a", encoding="utf-8") as fout:
         role = msg["role"]
         fout.write(f"{role.upper()}:\n{msg['content']}\n\n")
     fout.write("="*40 + "\n\n")
-
