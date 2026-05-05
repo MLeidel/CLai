@@ -21,10 +21,12 @@ clai will prompt for model and assume new conversation.
 | :--- | :---                        |
 |`clai PROMPT...`                    |write the prompt on the command line  
 |`clai log      `                    |print out the log contents to the console  
-|`clai new [role]`                   |new conversation & optional new role  
+|`clai new [role]`                   |new conversation & optional new instructions 
 |`clai clea[r\|n]`                   |erase .clai_local directory and all it's files  
 |`clai purge    `                    |erase log file  
 |`clai model {model}`                |set model for current directory  
+|`clai list`                         |list all current OpenAI models  
+|`clai help`                         |print out further help info  
 
 On running clai in a directory not previously visited,  
 clai will prompt for model and assume new conversation.

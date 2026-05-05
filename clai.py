@@ -12,6 +12,7 @@ Besides the prompt itself, other commands are:
   clea[r|n]  erase clai_conversation, clai_model, clai_log, clai_sysmsg
   purge     erase log clai_log
   model     set model for current directory
+  clai list list OpenAI models
   help      print clai help to console
 
 Files created:
@@ -66,6 +67,7 @@ clai new [role] new conversation [optional new role]
 clai clea[r|n]  erase .clai_local directory and all it's files
 clai purge      erase log file
 clai model {model}  set model for current directory
+clai list       list OpenAI models
 clai help       more info
 '''
 
@@ -82,6 +84,7 @@ clai new [role] new conversation for current directory
 clai clea[r|n]  removes .clai_local directory
 clai purge          erase log file
 clai model {model}  set model for current directory
+clai list       list OpenAI models
 clai help       this screen
 
 When running clai in a directory not previously visited,
@@ -124,10 +127,10 @@ def save_buffer(buf):
 
 
 def extract_token_counts(resp):
-    """
+    '''
     Return (total_tokens, prompt_tokens, completion_tokens)
     Works for both dict-like and object-like resp.
-    """
+    '''
     total_tokens = prompt_tokens = completion_tokens = None
 
     if isinstance(resp, dict):
@@ -146,7 +149,7 @@ def extract_token_counts(resp):
 
 
 def gptCode(key: str, model: str, messages: str) -> str:
-    """Call the OpenAI ChatCompletion endpoint."""
+    '''Call the OpenAI ChatCompletion endpoint.'''
     try:
         client = OpenAI(api_key=os.environ.get(key))
         resp = client.chat.completions.create(
@@ -271,12 +274,35 @@ elif sys.argv[1].lower() == "new":
         cprint(f"System Message: {SYSMSG}\n", 'yellow', attrs=['bold',])
     sys.exit()
 
+elif sys.argv[1].lower() == "list":
+    client = OpenAI(api_key=os.getenv("GPTKEY"))
+    models = client.models.list()
+    for model in models:
+        # print(model.id)
+        cprint(model.id, 'grey', attrs=['bold',])
+    sys.exit()
+
 elif sys.argv[1].lower() == "help":
     cprint(helpmsg, 'grey', attrs=['bold',])  # , attrs=['reverse']
     cprint(f"Current Model: {MODEL}", 'grey', attrs=['bold',])
     cprint(f"Current System Msg: {SYSMSG}\n", 'grey', attrs=['bold',])
     sys.exit()
 
+
+def gptCode(key: str, model: str, messages: str) -> str:
+    '''Call the OpenAI ChatCompletion endpoint.'''
+    try:
+        client = OpenAI(api_key=os.environ.get(key))
+        resp = client.chat.completions.create(
+        model    = model,
+        messages = messages)
+        content = resp.choices[0].message.content.strip()
+        total_tokens, prompt_tokens, completion_tokens = extract_token_counts(resp)
+        # Return as a tuple (content, total, prompt, completion)
+        return content, total_tokens, prompt_tokens, completion_tokens
+    except Exception as e:
+        error_abort("Client Error " + str(e))
+        return ""
 
 # process prompt
 
