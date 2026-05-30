@@ -1,3 +1,5 @@
+#!/bin/env python3
+
 '''
 clai.py
 Command Line AI
@@ -12,7 +14,7 @@ Besides the prompt itself, other commands are:
   clea[r|n]  erase clai_conversation, clai_model, clai_log, clai_sysmsg
   purge     erase log clai_log
   model     set model for current directory
-  clai list list OpenAI models
+  list      list OpenAI models
   help      print clai help to console
 
 Files created:
@@ -26,8 +28,7 @@ Requires ENV keys:
 'GPTMOD' for default openai model,
 'GPTMSG' for default system message
 for example: export GPTMOD=gpt-4o-mini
-
-pyinstaller --onedir --clean --noconfirm --strip --contents-directory clai_files clai.py
+SEE https://auth.openai.com/log-in for more info.
 '''
 import sys, os
 from pathlib import Path
@@ -39,6 +40,8 @@ from rich.status import Status
 import time
 from time import localtime, strftime
 from termcolor import cprint
+from termcolor import colored
+from typing import Optional
 from openai import OpenAI
 
 MODEL = ""
@@ -90,7 +93,8 @@ clai help       this screen
 When running clai in a directory not previously visited,
 clai will assume new conversation.
 
-clai establishes a '.clai_local' in each directory it visits.
+clai establishes a '.clai_local' in each directory it visits
+by using any of its commands.
 
 Files created:
     .clai_local/
@@ -99,13 +103,26 @@ Files created:
         clai_log
         clai_sysmsg
 
-clai requires these environment keys:
+clai requires these environment variables:
 'GPTKEY' for your openai key,
 'GPTMOD' for default openai model,
 'GPTMSG' for default system message
+To register a OpenAI key visit: https://auth.openai.com/log-in
 '''
 
 # FUNCTIONS
+
+def last_modified_in_dir(xpath: str) -> Optional[str]:
+    ''' Will determine if CLai has previous results in this directory '''
+    path = Path(xpath)
+    try:
+        if path.exists():
+            mtime = path.stat().st_mtime
+            dt = datetime.datetime.fromtimestamp(mtime)  # local time
+            return dt.strftime("%Y-%m-%d %H:%M:%S")
+    except OSError:
+        pass
+    return None
 
 def error_abort(msg):
     cprint(f"{msg}\n", 'red', attrs=['bold',])
@@ -190,13 +207,21 @@ def cprint_text_wrapped(source, text, color='yellow'):
 
 # all local clai files stored in this directory
 # all visits to any directory by clai will create this hidden sub-directory
-files_path = ".clai_local"
-os.makedirs(files_path, exist_ok=True)
+
+
+files_path = "./.clai_local"
+MODEL = ""
 # make file path variable for easier file management syntax
 log_path = os.path.join(files_path, "clai_log")
 conversation_path = os.path.join(files_path, "clai_conversation")
 model_path = os.path.join(files_path, "clai_model")
 sysmsg_path = os.path.join(files_path, "clai_sysmsg")
+result = last_modified_in_dir(files_path)
+if result is not None:
+    history = colored(f".clai_local is present from: {result}", 'yellow', attrs=['bold',])
+else:
+     history = colored("No history.",'yellow', attrs=['bold',])
+
 
 # SET THE CORRECT MODEL
 
@@ -224,11 +249,13 @@ else:
 
 if len(sys.argv) <= 1:
     cprint(openmsg, 'yellow', attrs=['bold',])  # , attrs=['reverse']
-    cprint(f"Model: {MODEL}\n", 'yellow', attrs=['bold',])
-    cprint(f"System Msg: {SYSMSG}\n", 'yellow', attrs=['bold',])
+    print(history)
+    cprint(f"Model: {MODEL}", 'yellow', attrs=['bold',])
+    cprint(f"System Msg: {SYSMSG}", 'yellow', attrs=['bold',])
     sys.exit()
 
 # execute other command or prompt ...
+os.makedirs(files_path, exist_ok=True)  # establish hidden directory
 
 if sys.argv[1].lower() == "model":
     if len(sys.argv) != 3:
@@ -251,17 +278,10 @@ elif sys.argv[1].lower() == "purge":
     sys.exit()
 
 elif sys.argv[1].lower().startswith("clea"):
-    if os.path.isfile(conversation_path):
-        os.remove(conversation_path)
-    if os.path.isfile(log_path):
-        os.remove(log_path)
-    if os.path.isfile(model_path):
-        os.remove(model_path)
-    if os.path.isfile(sysmsg_path):
-        os.remove(sysmsg_path)
-    # now remove empty directory
-    Path(files_path).rmdir()
-    cprint("clai files removed\n", 'yellow', attrs=['bold',])
+    path = Path(files_path)
+    if path.exists():
+        shutil.rmtree(path)
+    cprint(".clai_local removed from this directory\n", 'yellow', attrs=['bold',])
     sys.exit()
 
 elif sys.argv[1].lower() == "new":
