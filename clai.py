@@ -14,8 +14,9 @@ Besides the prompt itself, other commands are:
   clea[r|n]  erase clai_conversation, clai_model, clai_log, clai_sysmsg
   purge     erase log clai_log
   model     set model for current directory
-  list      list OpenAI models
+  html      convert last response to HTML and open in browser
   help      print clai help to console
+  list      list OpenAI models
 
 Files created:
     .clai_local/ clai_conversation, clai_model, clai_log, clai_sysmsg
@@ -31,10 +32,12 @@ for example: export GPTMOD=gpt-4o-mini
 SEE https://auth.openai.com/log-in for more info.
 '''
 import sys, os
+import md2html  # local
 from pathlib import Path
 import datetime
 import json
 import shutil
+import webbrowser
 import textwrap
 from rich.status import Status
 import time
@@ -70,6 +73,7 @@ clai new [role] new conversation [optional new role]
 clai clea[r|n]  erase .clai_local directory and all it's files
 clai purge      erase log file
 clai model {model}  set model for current directory
+clai html       convert last response to HTML and open in browser
 clai list       list OpenAI models
 clai help       more info
 '''
@@ -87,6 +91,7 @@ clai new [role] new conversation for current directory
 clai clea[r|n]  removes .clai_local directory
 clai purge          erase log file
 clai model {model}  set model for current directory
+clai html       convert last response to HTML and open in browser
 clai list       list OpenAI models
 clai help       this screen
 
@@ -294,6 +299,16 @@ elif sys.argv[1].lower() == "new":
         cprint(f"System Message: {SYSMSG}\n", 'yellow', attrs=['bold',])
     sys.exit()
 
+elif sys.argv[1].lower() == "html":
+    rc = md2html.md_render(".clai_local/clai_last_resp.md", ".clai_local/clai_last_resp.html")
+    if rc is not True:
+        print("error saving 'last' response")
+        sys.exit()
+    file_path = Path(".clai_local/clai_last_resp.html").resolve()
+    file_url = file_path.as_uri()
+    webbrowser.open(file_url)
+    sys.exit()
+
 elif sys.argv[1].lower() == "list":
     client = OpenAI(api_key=os.getenv("GPTKEY"))
     models = client.models.list()
@@ -352,6 +367,8 @@ with Status("[bold green]Calling AI...[/bold green]"):
 CBUFF.append(
     {"role": "assistant", "content": ai_text}
 )
+
+open(".clai_local/clai_last_resp.md", "w", encoding='utf-8').write(ai_text)
 
 # 4) show it
 cprint_text_wrapped("text", "\n" + ai_text + "\n", "green")
